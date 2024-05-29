@@ -1,0 +1,578 @@
+@import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
+
+.askNelson {
+  overflow: hidden;
+  padding: 1em;
+  color: "[theme:bodyText, default: #323130]";
+  color: var(--bodyText);
+  &.teams {
+    font-family: $ms-font-family-fallbacks;
+  }
+}
+
+header {
+  text-align: left;
+  padding: 20px;
+  position: relative;
+  top: 0;
+  left: 0;
+}
+
+h1 {
+  font-size: 20px;
+  color: #333;
+  margin: 0;
+}
+
+.list {
+  color: #333333;
+  font-family: 'Segoe UI Regular WestEuropean', 'Segoe UI', Tahoma, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+  box-sizing: border-box;
+  margin: 10;
+  padding: 10;
+  line-height: 50px;
+  list-style-type: none;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);
+}
+
+.listItem {
+  position: relative;
+  color: #333333;
+  vertical-align: center;
+  font-family: 'Segoe UI Regular WestEuropean', 'Segoe UI', Tahoma, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 10px;
+  box-shadow: none;
+  *zoom: 1;
+  padding: 9px 28px 3px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  list-style-type: none;
+  border-radius: 10px;
+}
+
+.listpadding{
+  padding: 10px;
+}
+
+.itemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.itemTitle {
+  margin: 0;
+  color: #637064;
+}
+
+.itemDate {
+  font-size: 12px;
+  color: #666;
+}
+
+.itemDescription {
+  margin: 5px 0;
+  font-size: 14px;
+  line-height: 1.4;
+  max-height: 2.8em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemReplies {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.replyForm {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.replyForm textarea {
+  width: 95%;
+  height: 100px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  resize: vertical;
+}
+
+.replyForm button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.commentSection {
+  display: flex;
+  align-items: center;
+}
+
+.commentIcon {
+  width: 16px;
+  height: 16px;
+  fill: #888;
+  margin-right: 5px;
+}
+
+.replyCount {
+  font-size: 14px;
+  color: #888;
+}
+
+.repliesText {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.replyList {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.repliesContainer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.itemReplies.active + .repliesContainer {
+  max-height: 1000px; /* Adjust this value based on your content */
+}
+
+
+li a {
+  text-decoration: none;
+  color: #2d2f31;
+}
+
+.nav {
+  width: 300px;
+  background: #d9d9d9;
+  margin: 40px auto;
+}
+
+.label {
+  display: block;
+  cursor: pointer;
+}
+
+.title {
+  padding: 30px;
+  background: #2d2f31;
+  color: white;
+  font-size: 1.2em;
+  font-variant: small-caps;
+}
+
+.title::after {
+  float: right;
+  right: 10%;
+  content: "+";
+}
+
+.slide {
+  clear: both;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  text-align: center;
+  transition: height 0.4s ease;
+}
+
+.slide li {
+  padding: 30px;
+}
+
+.checkbox {
+  position: absolute;
+  opacity: 0;
+  height: 0;
+}
+
+.checkbox:checked + .slide {
+  height: 300px;
+}
+
+select {
+  appearance: none;
+  /*  safari  */
+  -webkit-appearance: none;
+  /*  other styles for aesthetics */
+  width: 75%;
+  font-size: 1.15rem;
+  padding: 0.4em;
+  background-color: #fff;
+  border: 1px solid #caced1;
+  border-radius: 10px;
+  color: #000;
+  margin: 0 0 1em 0;
+  cursor: pointer;
+}
+
+.customSelect {
+  margin-right: 10px; /* Add some spacing between dropdown and search box */
+  
+}
+
+// .customArrow {
+//   position: absolute; /* Position the arrow absolutely */
+//   top: 50%; /* Position at the vertical center */
+//   right: 0.8em; /* Adjust the horizontal position */
+//   transform: translateY(-50%); /* Adjust the vertical position */
+//   pointer-events: none; /* Prevent the arrow from interfering with clicks */
+// }
+
+// .customArrow::before,
+// .customArrow::after {
+//   --size: 0.3rem;
+//   content: "";
+//   display: block;
+//   position: absolute;
+//   right: 0;
+// }
+
+// .customArrow::before {
+//   border-left: var(--size) solid transparent;
+//   border-right: var(--size) solid transparent;
+//   border-bottom: var(--size) solid black;
+//   top: 0;
+// }
+
+// .customArrow::after {
+//   border-left: var(--size) solid transparent;
+//   border-right: var(--size) solid transparent;
+//   border-top: var(--size) solid black;
+//   bottom: 0;
+// }
+
+.pagination{
+  padding: 30px 0;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination ul{
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.pagination a{
+  display: inline-block;
+  padding: 10px 18px;
+  color: #222;
+}
+
+.pagination a{
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  padding: 0;
+  text-align: center;
+  cursor: pointer;
+}
+
+
+.editReplyButton {
+  background-color: #000059;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  margin-left: 10px;
+  margin: 10px;
+}
+
+
+.editReplyButton:hover {
+  background-color: #DDDDE9;
+}
+
+.saveReplyButton {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.saveReplyButton:hover {
+  background-color: #45a049;
+}
+
+.cancelEditButton {
+  background-color: #f44336;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.cancelEditButton:hover {
+  background-color: #da190b;
+}
+
+.editReplyInput {
+  width: 50%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+}
+
+.cancelEditButton {
+  margin-left: 8px;
+  padding: 4px 8px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.replyButtonsContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.deleteReplyButton{
+  margin-left: 8px;
+  padding: 4px 8px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.customSelect {
+  display: inline-block;
+  margin-right: 10px;
+  width: 200px; /* Adjust the width as needed */
+}
+
+.searchBox {
+  display: inline-block;
+  position: absolute;
+  align-items: flex-end;
+  vertical-align: top; /* Align the search box with the top of the dropdown */
+  right: 0; 
+
+  input[type="text"] {
+    padding: 6px 30px 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 14px;
+    width: 200px; /* Adjust the width as needed */
+  }
+
+  &::after {
+    content: "\f002";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+  }
+}
+
+.filterContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.page-number {
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  padding: 8px 16px;
+  margin: 0 4px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.page-number:hover {
+  background-color: #f5f5f5;
+}
+
+.page-number.active {
+  color: #fff;
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.approvedStatus {
+
+
+}
+
+.underReviewStatus {
+  color: #000;
+}
+
+.calendarIcon{
+  width: 12px;
+  height: 11px;
+}
+
+.replyList {
+  margin-bottom: 10px;
+}
+
+.replyList li {
+  margin-bottom: 5px;
+}
+
+// Assuming styles is the object containing all your class names from the SCSS module
+.replyFormContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+}
+
+.replyForm {
+  width: 90%;
+  margin-bottom: 1rem; // Adds space between the textarea and the toggle switch
+}
+.replyFormText{
+  width: 90%;
+}
+.buttonContainer {
+  width: 10vw;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.toggleContainer,
+button[type="submit"] {
+  width: 100%; // Ensures full width within the container
+  margin-top: 0.5rem; // Adds space between the elements
+}
+
+// Media query for smaller screens
+@media (max-width: 768px) {
+  .replyForm,
+  .toggleContainer,
+  button[type="submit"] {
+    width: 90%;
+  }
+}
+
+.changeStatusButton{
+  border-radius: 10px;
+}
+
+.toggleContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 80px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fdd719;
+  transition: .4s;
+  border-radius: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: rgba(255, 255, 255, 0.3);
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #52d45a;
+}
+
+input:checked + .slider:before {
+  transform: translateX(45px);
+}
+
+.approvedStatus,
+.underReviewStatus {
+  color: white;
+  font-size: 12px;
+  z-index: 1;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+
+
+
+
+
+

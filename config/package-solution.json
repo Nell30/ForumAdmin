@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "ask-nelson-client-side-solution",
+    "id": "ddcc953b-8788-49ef-9440-472b505580cc",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.18.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "ask-nelson description"
+      },
+      "longDescription": {
+        "default": "ask-nelson description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "ask-nelson Feature",
+        "description": "The feature that activates elements of the ask-nelson solution.",
+        "id": "d3a5f4b0-5d82-4e6a-a3fe-3d74cfd17f11",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/ask-nelson.sppkg"
+  }
+}

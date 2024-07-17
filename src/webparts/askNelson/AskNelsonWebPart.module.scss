@@ -16,6 +16,25 @@ header {
   position: relative;
   top: 0;
   left: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h1 {
+    margin: 0;
+  }
+
+  .archiveLink {
+    a {
+      color: #333;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
 }
 
 h1 {
@@ -60,20 +79,9 @@ h1 {
   padding: 10px;
 }
 
-.itemHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 .itemTitle {
   margin: 0;
   color: #637064;
-}
-
-.itemDate {
-  font-size: 12px;
-  color: #666;
 }
 
 .itemDescription {
@@ -454,9 +462,8 @@ select {
   color: #000;
 }
 
-.calendarIcon{
-  width: 12px;
-  height: 11px;
+.rejectedStatus{
+  color: #000;
 }
 
 .replyList {
@@ -526,6 +533,41 @@ button[type="submit"] {
   height: 0;
 }
 
+.rejectedSlider{
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: red;
+  transition: .4s;
+  border-radius: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rejectedSlider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: rgba(255, 255, 255, 0.3);
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .rejectedSlider {
+  background-color: #fdd719;
+}
+
+input:checked + .rejectedSlider:before {
+  transform: translateX(45px);
+}
+
 .slider {
   position: absolute;
   cursor: pointer;
@@ -571,8 +613,90 @@ input:checked + .slider:before {
 }
 
 
+.itemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.itemTitle {
+  margin: 0;
+}
+
+.itemDate {
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* Push the itemDate to the right */
+  order: 1; /* Ensure itemDate is positioned on the right */
+
+  span {
+    margin-right: 5px;
+  }
+
+  .calendarIcon {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+  }
+
+  .deleteIcon {
+    width: 16px;
+    height: 16px;
+    margin-left: 10px;
+    cursor: pointer;
+
+    svg {
+      fill: #999;
+      transition: fill 0.3s ease;
+
+      &:hover {
+        fill: #ff0000;
+      }
+    }
+  }
+}
 
 
+.archiveLink {
+  margin-top: 20px;
+  float: right;
 
+  a {
+    color: #333;
+    text-decoration: none;
 
+    &:hover {
+      text-decoration: underline;
+    }
+    cursor: pointer;
+  }
+}
 
+.filterContainer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+
+  .customSelect {
+    margin-right: 10px;
+  }
+
+  .searchBox {
+    margin-left: auto;
+  }
+}
+
+.backToListButton {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.backToListButton:hover {
+  background-color: #0056b3;
+}

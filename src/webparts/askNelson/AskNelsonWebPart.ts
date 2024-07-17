@@ -6,16 +6,30 @@ import { faCommentAlt } from '@fortawesome/free-solid-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { ISPList, SortOrder } from './components/interfaces';
 import { sortItems, renderPageNumbers } from './components/utils';
+import { SPComponentLoader } from '@microsoft/sp-loader';
 
 library.add(faCommentAlt);
 
-const image: any= require('./assets/hospital.jpg');
-
 export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
-  private sortOrder: SortOrder = SortOrder.Asc;
+  private sortOrder: SortOrder = SortOrder.Newest;
   private currentPage = 1;
   private readonly itemsPerPage = 10;
+  private items: any[] = []; // Declare and initialize the 'items' property as an empty array
 
+  public onInit(): Promise<void> {
+    console.log('onInit called', this);
+    return super.onInit();
+  }
+
+  protected onDispose(): void {
+    console.log('onDispose called', this);
+    super.onDispose();
+  }
+
+  constructor() {
+    super();
+    SPComponentLoader.loadCss('https://maxcdn.bootstrapcdn.com/font-awesome/6.4.2/css/font-awesome.min.css');
+  }
   private async getListData(): Promise<ISPList[]> {
     const response = await this.context.spHttpClient.get(
       `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/GetByTitle('Reflection')/items`,
@@ -32,16 +46,18 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
 
   private renderList(items: ISPList[]): void {
     const sortedItems = sortItems(items, this.sortOrder);
+    const filteredItems = sortedItems.filter((item) => item.Status !== 'Rejected');
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
-    const paginatedItems = sortedItems.slice(startIndex, endIndex);
+    const paginatedItems = filteredItems.slice(startIndex, endIndex);
 
     let html = '';
-
+    
     if (paginatedItems.length === 0) {
       html = '<p>No results found.</p>';
     } else {
-           
+    
+      
     paginatedItems.forEach((item: ISPList) => {
       const createdDate = new Date(item.Created);
       const formattedDate = createdDate.toLocaleDateString();
@@ -51,16 +67,21 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
       html += `
         <div class="${styles.listItem}">
           <div class="${styles.listpadding}">
-            <div class="${styles.itemHeader}">              
-              <h3 class="${styles.itemTitle}"><b class="${styles.itemTitle}">${item.Answers}</b></h3>           
-              <div class="${styles.itemDate}">
-                <span>${formattedDate}</span>
-                <svg class=${styles.calendarIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z"/></svg>
-                <span>${formattedTime}</span>
-                <svg class="${styles.calendarIcon}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/></svg>
+          <div class="${styles.itemHeader}">              
+            <h3 class="${styles.itemTitle}"><b class="${styles.itemTitle}">${item.Answers}</b></h3>
+            <div class="${styles.itemDate}">
+              <span>${formattedDate}</span>             
+              <i class="fa-regular fa-calendar ${styles.calendarIcon}"></i>
+              <span>${formattedTime}</span>
+              <i class="fa-regular fa-clock class="${styles.calendarIcon}"></i>
+              <div class="${styles.deleteIcon}" data-item-id="${item.Id}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                  <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
+                </svg>
+                
               </div>
-            </div>
-            <p class="${styles.itemDescription}">${item.Better}</p>
+            </div>             
+          </div>
             <div class="${styles.itemReplies}">                   
 
             <div class="${styles.toggleContainer}">
@@ -75,9 +96,8 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
 
             
               <div class="${styles.commentSection}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="${styles.commentIcon}">
-                  <path d="M256 32C114.6 32 0 125.1 0 240c0 49.6 21.4 95 57 130.7C44.5 421.1 2.7 466 2.2 466.5c-2.2 2.3-2.8 5.7-1.5 8.7S4.8 480 8 480c66.3 0 116-31.8 140.6-51.4 32.7 12.3 69 19.4 107.4 19.4 141.4 0 256-93.1 256-208S397.4 32 256 32z"/>
-                </svg>
+                <i class="fa-solid fa-comment ${styles.commentIcon}"></i>
+
                 <span class="${styles.replyCount}">${replies.length}</span>
               </div>
             </div>
@@ -144,9 +164,170 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
         toggleSwitch.addEventListener('change', this.handleToggleChange.bind(this));
       });
 
+      const deleteIcons = this.domElement.querySelectorAll(`.${styles.deleteIcon}`);
+      deleteIcons.forEach((deleteIcon) => {
+        deleteIcon.addEventListener('click', this.handleDeleteItem.bind(this));
+      });
+
+    }
+  }
+  
+  private renderArchive(items: ISPList[]): void {
+    const rejectedItems = items.filter((item) => item.Status === 'Rejected');
+  
+    let html = '';
+  
+    if (rejectedItems.length === 0) {
+      html = '<p>No archived items found.</p>';
+    } else {
+      rejectedItems.forEach((item: ISPList) => {
+        const createdDate = new Date(item.Created);
+        const formattedDate = createdDate.toLocaleDateString();
+        const formattedTime = createdDate.toLocaleTimeString();
+        const replies = item.Replies ? item.Replies.split('\n') : [];
+  
+        html += `
+          <div class="${styles.listItem}">
+            <div class="${styles.listpadding}">
+              <div class="${styles.itemHeader}">              
+                <h3 class="${styles.itemTitle}"><b class="${styles.itemTitle}">${item.Answers}</b></h3>
+                <div class="${styles.itemDate}">
+                  <span>${formattedDate}</span>
+                  <i class="fa-regular fa-calendar ${styles.calendarIcon}"></i>
+                  <span>${formattedTime}</span>
+                  <i class="fa-regular fa-clock class="${styles.calendarIcon}"></i>
+                  <div class="${styles.deleteIcon}" data-item-id="${item.Id}">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                    <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
+                  </svg>
+                
+              </div>
+                </div>             
+              </div>
+              
+              <div class="${styles.itemReplies}">
+  
+                <div class="${styles.toggleContainer}">
+                  <label class="${styles.switch}">
+                    <input type="checkbox" data-item-id="${item.Id}" ${item.Status === 'Pending' ? 'checked' : ''}>
+                    <span class="${styles.rejectedSlider} ${item.Status === 'Rejected' ? styles.rejectedSlider : ''}">
+                    <span class="${item.Status === 'Pending' ? styles.underReviewStatus : styles.rejectedStatus}">${item.Status === 'Pending' ? 'Pending' : 'Rejected'}
+                    </span>
+                    </span>
+                  </label>
+                </div>
+                                
+                <div class="${styles.commentSection}">
+                <i class="fa-solid fa-comment ${styles.commentIcon}"></i>
+
+                <span class="${styles.replyCount}">${replies.length}</span>
+              </div>
+              </div>
+              <div class="${styles.repliesContainer}">
+                <ul class="${styles.replyList}">
+                  ${replies.map((reply, index) => `
+                    <li>
+                      ${reply}
+                      <i class="fa-regular fa-pen-to-square ${styles.editReplyButton}" data-item-id="${item.Id}" data-reply-index="${index}"></i>
+                      <i class="fa-solid fa-trash ${styles.deleteReplyButton}" data-item-id="${item.Id}" data-reply-index="${index}"></i>
+                    </li>
+                  `).join('')}
+                </ul>
+                <div class="${styles.replyForm}">
+                  <form data-id="${item.Id}" class="${styles.replyForm}">
+                    <div class="${styles.replyFormContainer}">
+                      <textarea name="reply" placeholder="Enter your reply"></textarea>
+                      <div class="${styles.buttonContainer}">                                   
+                        <button type="submit">Submit Reply</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>        
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+    const archiveContainer = this.domElement.querySelector('#archiveContainer');
+    if (archiveContainer) {
+      archiveContainer.innerHTML = html;
+  
+      const toggleSwitches = archiveContainer.querySelectorAll('input[type="checkbox"]');
+      toggleSwitches.forEach((toggleSwitch) => {
+        toggleSwitch.addEventListener('change', this.handleArchiveToggleChange.bind(this));
+      });
+
+      const deleteIcons = archiveContainer.querySelectorAll(`.${styles.deleteIcon}`);
+      deleteIcons.forEach((deleteIcon) => {
+        deleteIcon.addEventListener('click', this.handleDeleteItemList.bind(this));
+      });
     }
   }
 
+  private async handleDeleteItemList(event: Event): Promise<void> {
+    const deleteIcon = event.target as HTMLElement;
+    const itemId = deleteIcon.closest(`.${styles.deleteIcon}`)?.getAttribute('data-item-id');
+  
+    if (itemId && this.items) { // Check if 'this.items' is defined
+      // Display warning before deleting
+      const confirmDelete = confirm('Are you sure you want to delete this item?');
+  
+      if (confirmDelete) {
+        try {
+          // Find the index of the item in the array
+          const itemIndex = this.items.findIndex(item => item.Id === parseInt(itemId));
+  
+          if (itemIndex !== -1) {
+            // Remove the item from the array using splice
+            this.items.splice(itemIndex, 1);
+  
+            // Refresh the list
+            this.renderArchive(this.items);
+          }
+        } catch (error) {
+          console.error('Error deleting item:', error);
+          alert('Failed to delete item. Please try again.');
+        }
+      }
+    }
+  }
+  
+
+  private async handleArchiveToggleChange(event: Event): Promise<void> {
+    const toggleSwitch = event.target as HTMLInputElement;
+    const itemId = parseInt(toggleSwitch.getAttribute('data-item-id')!, 10);
+    const newStatus = toggleSwitch.checked ? 'Under Review' : 'Rejected';
+  
+    await this.updateItemStatus(itemId, newStatus);
+    const items = await this.getListData();
+    this.renderArchive(items);
+  }
+
+  // Function to handle delete item
+  private async handleDeleteItem(event: Event): Promise<void> {
+    const deleteIcon = event.target as HTMLElement;
+    const itemId = deleteIcon.closest(`.${styles.deleteIcon}`)?.getAttribute('data-item-id');
+
+    if (itemId) {
+      // Display warning before deleting
+      const confirmDelete = confirm('Are you sure you want to delete this item?');
+
+      if (confirmDelete) {
+        try {
+          // Update item status to "Rejected"
+          await this.updateItemStatus(parseInt(itemId), 'Rejected');
+
+          // Refresh the list
+          const items = await this.getListData();
+          this.renderList(items);
+        } catch (error) {
+          console.error('Error deleting item:', error);
+          alert('Failed to delete item. Please try again.');
+        }
+      }
+    }
+  }
 
   private async handleToggleChange(event: Event): Promise<void> {
     const toggleSwitch = event.target as HTMLInputElement;
@@ -393,51 +574,83 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
   
 
   private async getListItem(itemId: number): Promise<ISPList> {
-    const response: SPHttpClientResponse = await this.context.spHttpClient.get(
-      `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/GetByTitle('Reflection')/items(${itemId})`,
-      SPHttpClient.configurations.v1
-    );
+  if (this.context && this.context.pageContext && this.context.pageContext.web) {
+    try {
+      const response: SPHttpClientResponse = await this.context.spHttpClient.get(
+        `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/GetByTitle('Reflection')/items(${itemId})`,
+        SPHttpClient.configurations.v1
+      );
 
-    if (!response.ok) {
-      throw new Error(`Error retrieving list item: ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`Error retrieving list item: ${response.statusText}`);
+      }
+
+      const data: ISPList = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error retrieving list item:', error);
+      throw error;
+    }
+  } else {
+    throw new Error('Context or page context is not available.');
+  }
+}
+
+  public async render(): Promise<void> {
+
+    if (!this || !this.domElement) {
+      console.error('Component or DOM element is not available');
+      return;
     }
 
-    const data: ISPList = await response.json();
-    return data;
-  }
-
-  public render(): void {
+    console.log('Render method called', this, this.domElement);
+    
     this.getListData()
       .then((items) => {
-        const totalPages = Math.ceil(items.length / this.itemsPerPage);
 
+        if (!this.domElement) {
+          console.error('DOM element is no longer available');
+          return;
+        }
+        
+        const totalPages = Math.ceil(items.length / this.itemsPerPage);
+  
         this.domElement.innerHTML = `
           <head><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
           </head>
-          <img src="${image}">
+          
           <header>
-            <h1>Safe Space</h1>
+            <h1>Ask Ceo</h1>
+            <div class="${styles.archiveLink}">
+              <i class="fa-solid fa-box-archive"></i>
+              <a href="#" id="archiveLink">Archive</a>
+            </div>
           </header>
+  
+          <div class="${styles.searchBox}">
+            <input type="text" placeholder="Search..." id="searchInput">
+          </div>
+
           <div class="filterContainer">
             <div class="${styles.customSelect}">
               <select>
-                <option value="">Sort By</option>
-                <option value="${SortOrder.Asc}">A-Z</option>
-                <option value="${SortOrder.Desc}">Z-A</option>
-                <option value="${SortOrder.Oldest}">Oldest</option>
                 <option value="${SortOrder.Newest}">Newest</option>
+                <option value="${SortOrder.Oldest}">Oldest</option>               
+                <option value="${SortOrder.Asc}">A-Z</option>
+                <option value="${SortOrder.Desc}">Z-A</option>               
                 <option value="${SortOrder.Pending}">Pending</option>
                 <option value="${SortOrder.Approved}">Approved</option>
               </select>            
             </div>
-
-            <div class="${styles.searchBox}">
-              <input type="text" placeholder="Search..." id="searchInput">
-            </div>
+          </div>
+          
+  
+          <div id="archiveContainer" style="display: none;">
+            <button id="backToListButton" class=${styles.backToListButton}>Back to List</button>
           </div>
 
           <div id="spListContainer"></div>
-
+  
           <div class="${styles.pagination}">
             <ul>
               <a class="prev-button">&lt;</a>
@@ -446,8 +659,22 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
             </ul>
           </div>
         `;
-
+  
         this.renderList(items);
+        
+        
+        const backToListButton = this.domElement.querySelector('#backToListButton');
+        if (backToListButton) {
+          backToListButton.addEventListener('click', () => {
+            const archiveContainer = this.domElement.querySelector('#archiveContainer') as HTMLElement;
+            const spListContainer = this.domElement.querySelector('#spListContainer') as HTMLElement;
+            if (archiveContainer && spListContainer) {
+              archiveContainer.style.display = 'none';
+              spListContainer.style.display = 'block';
+              this.renderList(items);
+            }
+          });
+        }
 
         const sortSelect = this.domElement.querySelector('select');
         if (sortSelect) {
@@ -462,10 +689,31 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
         if (searchInput) {
           searchInput.addEventListener('input', this.handleSearch.bind(this));
         }
+        
+        const archiveLink = this.domElement.querySelector('#archiveLink');
+        if (archiveLink) {
+          archiveLink.addEventListener('click', (event: Event) => {
+            event.preventDefault();
+            const archiveContainer = this.domElement.querySelector('#archiveContainer') as HTMLElement;
+            const spListContainer = this.domElement.querySelector('#spListContainer') as HTMLElement;
+            if (archiveContainer && spListContainer) {
+              if (archiveContainer.style.display === 'none') {
+                archiveContainer.style.display = 'block';
+                spListContainer.style.display = 'none';
+                this.renderArchive(items);
+              } else {
+                archiveContainer.style.display = 'none';
+                spListContainer.style.display = 'block';
+                this.renderList(items);
+              }
+            }
+          });
+        }
 
+  
         const prevButton = this.domElement.querySelector('.prev-button');
         const nextButton = this.domElement.querySelector('.next-button');
-
+  
         prevButton?.addEventListener('click', () => {
           if (this.currentPage > 1) {
             this.currentPage--;
@@ -473,15 +721,15 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
             this.updateActiveButton();
           }
         });
-
+  
         nextButton?.addEventListener('click', () => {
           if (this.currentPage < totalPages) {
             this.currentPage++;
             this.renderList(items);
             this.updateActiveButton();
           }
-        });
-
+        })
+  
         
         const pageNumbers = this.domElement.querySelectorAll('.page-number');
         pageNumbers.forEach((pageNumber) => {
@@ -493,21 +741,21 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
           (pageNumber as HTMLElement).style.margin = '0 4px';
           (pageNumber as HTMLElement).style.borderRadius = '4px';
           (pageNumber as HTMLElement).style.cursor = 'pointer';
-
+  
           // Add hover styles
           (pageNumber as HTMLElement).addEventListener('mouseover', () => {
             if (!(pageNumber as HTMLElement).classList.contains('active')) {
               (pageNumber as HTMLElement).style.backgroundColor = '#f5f5f5';
             }
           });
-
+  
           // Remove hover styles
           (pageNumber as HTMLElement).addEventListener('mouseout', () => {
             if (!(pageNumber as HTMLElement).classList.contains('active')) {
               (pageNumber as HTMLElement).style.backgroundColor = '#fff';
             }
           });
-
+  
           pageNumber.addEventListener('click', (event: Event) => {
             const selectedPage = parseInt((event.target as HTMLButtonElement).getAttribute('data-page')!, 10);
             this.currentPage = selectedPage;
@@ -515,7 +763,7 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
             this.updateActiveButton();
           });
         });
-
+  
         this.updateActiveButton();
       })
       .catch((error) => {

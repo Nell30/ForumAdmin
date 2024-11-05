@@ -8,15 +8,15 @@ import { ISPList, SortOrder } from './components/interfaces';
 import { sortItems, renderPageNumbers } from './components/utils';
 import { SPComponentLoader } from '@microsoft/sp-loader';
 
+
 library.add(faCommentAlt);
 
 export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
   private sortOrder: SortOrder = SortOrder.Newest;
   private currentPage = 1;
   private readonly itemsPerPage = 10;
-  private items: any[] = []; // Declare and initialize the 'items' property as an empty array
 
-  public onInit(): Promise<void> {
+  public async onInit(): Promise<void> {
     console.log('onInit called', this);
     return super.onInit();
   }
@@ -62,7 +62,10 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
       const createdDate = new Date(item.Created);
       const formattedDate = createdDate.toLocaleDateString();
       const formattedTime = createdDate.toLocaleTimeString();
-      const replies = item.Replies ? item.Replies.split('\n') : []; 
+      const replies = item.Replies ? item.Replies.split('\n') : [];
+      const pendingCount = items.filter(item => item.Status === 'Under Review').length;
+      const approvedCount = items.filter(item => item.Status === 'Approved').length;
+      this.renderStatusChart(pendingCount, approvedCount); 
 
       html += `
         <div class="${styles.listItem}">
@@ -169,165 +172,117 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
         deleteIcon.addEventListener('click', this.handleDeleteItem.bind(this));
       });
 
-    }
-  }
-  
-  private renderArchive(items: ISPList[]): void {
-    const rejectedItems = items.filter((item) => item.Status === 'Rejected');
-  
-    let html = '';
-  
-    if (rejectedItems.length === 0) {
-      html = '<p>No archived items found.</p>';
-    } else {
-      rejectedItems.forEach((item: ISPList) => {
-        const createdDate = new Date(item.Created);
-        const formattedDate = createdDate.toLocaleDateString();
-        const formattedTime = createdDate.toLocaleTimeString();
-        const replies = item.Replies ? item.Replies.split('\n') : [];
-  
-        html += `
-          <div class="${styles.listItem}">
-            <div class="${styles.listpadding}">
-              <div class="${styles.itemHeader}">              
-                <h3 class="${styles.itemTitle}"><b class="${styles.itemTitle}">${item.Answers}</b></h3>
-                <div class="${styles.itemDate}">
-                  <span>${formattedDate}</span>
-                  <i class="fa-regular fa-calendar ${styles.calendarIcon}"></i>
-                  <span>${formattedTime}</span>
-                  <i class="fa-regular fa-clock class="${styles.calendarIcon}"></i>
-                  <div class="${styles.deleteIcon}" data-item-id="${item.Id}">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                    <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
-                  </svg>
-                
-              </div>
-                </div>             
-              </div>
-              
-              <div class="${styles.itemReplies}">
-  
-                <div class="${styles.toggleContainer}">
-                  <label class="${styles.switch}">
-                    <input type="checkbox" data-item-id="${item.Id}" ${item.Status === 'Pending' ? 'checked' : ''}>
-                    <span class="${styles.rejectedSlider} ${item.Status === 'Rejected' ? styles.rejectedSlider : ''}">
-                    <span class="${item.Status === 'Pending' ? styles.underReviewStatus : styles.rejectedStatus}">${item.Status === 'Pending' ? 'Pending' : 'Rejected'}
-                    </span>
-                    </span>
-                  </label>
-                </div>
-                                
-                <div class="${styles.commentSection}">
-                <i class="fa-solid fa-comment ${styles.commentIcon}"></i>
+      
 
-                <span class="${styles.replyCount}">${replies.length}</span>
-              </div>
-              </div>
-              <div class="${styles.repliesContainer}">
-                <ul class="${styles.replyList}">
-                  ${replies.map((reply, index) => `
-                    <li>
-                      ${reply}
-                      <i class="fa-regular fa-pen-to-square ${styles.editReplyButton}" data-item-id="${item.Id}" data-reply-index="${index}"></i>
-                      <i class="fa-solid fa-trash ${styles.deleteReplyButton}" data-item-id="${item.Id}" data-reply-index="${index}"></i>
-                    </li>
-                  `).join('')}
-                </ul>
-                <div class="${styles.replyForm}">
-                  <form data-id="${item.Id}" class="${styles.replyForm}">
-                    <div class="${styles.replyFormContainer}">
-                      <textarea name="reply" placeholder="Enter your reply"></textarea>
-                      <div class="${styles.buttonContainer}">                                   
-                        <button type="submit">Submit Reply</button>
-                      </div>
-                    </div>
-                  </form>
-                </div>        
-              </div>
-            </div>
-          </div>
-        `;
-      });
-    }
-    const archiveContainer = this.domElement.querySelector('#archiveContainer');
-    if (archiveContainer) {
-      archiveContainer.innerHTML = html;
-  
-      const toggleSwitches = archiveContainer.querySelectorAll('input[type="checkbox"]');
-      toggleSwitches.forEach((toggleSwitch) => {
-        toggleSwitch.addEventListener('change', this.handleArchiveToggleChange.bind(this));
-      });
-
-      const deleteIcons = archiveContainer.querySelectorAll(`.${styles.deleteIcon}`);
-      deleteIcons.forEach((deleteIcon) => {
-        deleteIcon.addEventListener('click', this.handleDeleteItemList.bind(this));
-      });
     }
   }
 
-  private async handleDeleteItemList(event: Event): Promise<void> {
-    const deleteIcon = event.target as HTMLElement;
-    const itemId = deleteIcon.closest(`.${styles.deleteIcon}`)?.getAttribute('data-item-id');
+    private renderStatusChart(underReviewCount: number, approvedCount: number): void {
+    const total = underReviewCount + approvedCount;
+    const approvedPercentage = (approvedCount / total) * 100;
+    const underReviewPercentage = 100 - approvedPercentage;
+
+    // Calculate the stroke-dasharray and stroke-dashoffset for both segments
+    const circumference = 2 * Math.PI * 25; // 25 is the radius of the circle
+    const approvedDash = (approvedPercentage / 100) * circumference;
+    const underReviewDash = (underReviewPercentage / 100) * circumference;
+
+    const chartHtml = `
+      <svg width="60" height="60" viewBox="0 0 60 60">
+        <circle cx="30" cy="30" r="25" fill="transparent" stroke="#ff6700" stroke-width="5"
+                stroke-dasharray="${underReviewDash} ${circumference}"
+                stroke-dashoffset="0"
+                transform="rotate(-90 30 30)" />
+        <circle cx="30" cy="30" r="25" fill="transparent" stroke="#4CAF50" stroke-width="5"
+                stroke-dasharray="${approvedDash} ${circumference}"
+                stroke-dashoffset="${-underReviewDash}"
+                transform="rotate(-90 30 30)" />
+        <text x="30" y="30" text-anchor="middle" dy=".3em" font-size="14">${total}</text>
+      </svg>
+      <div class="${styles.chartLegend}">
+        <span class="${styles.underReviewLegend}">Under Review: ${underReviewCount}</span>
+        <span class="${styles.approvedLegend}">Approved: ${approvedCount}</span>
+      </div>
+    `;
+
+    const chartContainer = this.domElement.querySelector('#statusChart');
+    if (chartContainer) {
+      chartContainer.innerHTML = chartHtml;
+    }
+  }
   
-    if (itemId && this.items) { // Check if 'this.items' is defined
-      // Display warning before deleting
-      const confirmDelete = confirm('Are you sure you want to delete this item?');
   
-      if (confirmDelete) {
-        try {
-          // Find the index of the item in the array
-          const itemIndex = this.items.findIndex(item => item.Id === parseInt(itemId));
+  //Function to handle delete item
+  // private async handleDeleteItem(event: Event): Promise<void> {
+  //   const deleteIcon = event.target as HTMLElement;
+  //   const itemId = deleteIcon.closest(`.${styles.deleteIcon}`)?.getAttribute('data-item-id');
+
+  //   if (itemId) {
+  //     // Display warning before deleting
+  //     const confirmDelete = confirm('Are you sure you want to delete this item?');
+
+  //     if (confirmDelete) {
+  //       try {
+  //         // Update item status to "Rejected"
+  //         await this.updateItemStatus(parseInt(itemId), 'Rejected');
+
+  //         // Refresh the list
+  //         const items = await this.getListData();
+  //         this.renderList(items);
+  //       } catch (error) {
+  //         console.error('Error deleting item:', error);
+  //         alert('Failed to delete item. Please try again.');
+  //       }
+  //     }
+  //   }
+  // }
   
-          if (itemIndex !== -1) {
-            // Remove the item from the array using splice
-            this.items.splice(itemIndex, 1);
-  
-            // Refresh the list
-            this.renderArchive(this.items);
+      private async handleDeleteItem(event: Event): Promise<void> {
+        const deleteIcon = event.target as HTMLElement;
+        const itemId = deleteIcon.closest(`.${styles.deleteIcon}`)?.getAttribute('data-item-id');
+
+        if (itemId) {
+          // Display warning before deleting
+          const confirmDelete = confirm('Are you sure you want to delete this item?');
+
+          if (confirmDelete) {
+            try {
+              // Delete the item
+              await this.deleteItem(parseInt(itemId));
+
+              // Refresh the list
+              const items = await this.getListData();
+              this.renderList(items);
+            } catch (error) {
+              console.error('Error deleting item:', error);
+              alert('Failed to delete item. Please try again.');
+            }
           }
-        } catch (error) {
-          console.error('Error deleting item:', error);
-          alert('Failed to delete item. Please try again.');
         }
-      }
     }
-  }
-  
 
-  private async handleArchiveToggleChange(event: Event): Promise<void> {
-    const toggleSwitch = event.target as HTMLInputElement;
-    const itemId = parseInt(toggleSwitch.getAttribute('data-item-id')!, 10);
-    const newStatus = toggleSwitch.checked ? 'Under Review' : 'Rejected';
-  
-    await this.updateItemStatus(itemId, newStatus);
-    const items = await this.getListData();
-    this.renderArchive(items);
-  }
+    private async deleteItem(itemId: number): Promise<void> {
+        const response = await this.context.spHttpClient.post(
+            `${this.context.pageContext.web.absoluteUrl}/_api/web/lists/GetByTitle('Reflection')/items(${itemId})`,
+            SPHttpClient.configurations.v1,
+            {
+                headers: {
+                    'Accept': 'application/json;odata=nometadata',
+                    'Content-type': 'application/json;odata=nometadata',
+                    'odata-version': '',
+                    'IF-MATCH': '*',
+                    'X-HTTP-Method': 'DELETE'
+                }
+            }
+        );
 
-  // Function to handle delete item
-  private async handleDeleteItem(event: Event): Promise<void> {
-    const deleteIcon = event.target as HTMLElement;
-    const itemId = deleteIcon.closest(`.${styles.deleteIcon}`)?.getAttribute('data-item-id');
-
-    if (itemId) {
-      // Display warning before deleting
-      const confirmDelete = confirm('Are you sure you want to delete this item?');
-
-      if (confirmDelete) {
-        try {
-          // Update item status to "Rejected"
-          await this.updateItemStatus(parseInt(itemId), 'Rejected');
-
-          // Refresh the list
-          const items = await this.getListData();
-          this.renderList(items);
-        } catch (error) {
-          console.error('Error deleting item:', error);
-          alert('Failed to delete item. Please try again.');
+        if (!response.ok) {
+            throw new Error(`Error deleting item: ${response.statusText}`);
         }
-      }
     }
-  }
+
+  
+  
 
   private async handleToggleChange(event: Event): Promise<void> {
     const toggleSwitch = event.target as HTMLInputElement;
@@ -367,11 +322,16 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
     cancelEditButton?.addEventListener('click', () => {
       replyItem.innerHTML = `
         ${replyText}
-        <i class="fa-regular fa-pen-to-square ${styles.editReplyButton}" data-reply-index="${replyIndex}"></i>
-       `;
+        <i class="fa-regular fa-pen-to-square ${styles.editReplyButton}" data-reply-index="${replyIndex}" data-item-id="${itemId}"></i>
+        <i class="fa-regular fa-trash-can ${styles.deleteReplyButton}" data-reply-index="${replyIndex}" data-item-id="${itemId}"></i>
+      `;
       const editReplyButton = replyItem.querySelector(`.${styles.editReplyButton}`);
       editReplyButton?.addEventListener('click', this.handleEditReply.bind(this));
+      
+      const deleteReplyButton = replyItem.querySelector(`.${styles.deleteReplyButton}`);
+      deleteReplyButton?.addEventListener('click', this.handleDeleteReply.bind(this));
     });
+
   }
   
   private handleDeleteReply(event: Event): void {
@@ -478,18 +438,18 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
 
   private async handleReplySubmit(event: Event): Promise<void> {
     event.preventDefault();
-  
+    
     const form = event.target as HTMLFormElement;
     const itemId = form.getAttribute('data-id');
     const replyTextarea = form.querySelector('textarea[name="reply"]') as HTMLTextAreaElement;
     const replyText = replyTextarea.value;
-
+  
     if (itemId && replyText) {
       try {
         await this.submitReply(parseInt(itemId, 10), replyText, status);
-        alert('Reply submitted successfully');
         const items = await this.getListData();
         this.renderList(items);
+        // Move the alert to your rendering logic if needed
       } catch (error) {
         console.error('Error submitting reply:', error);
         alert('Failed to submit reply. Please try again.');
@@ -594,7 +554,9 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
   } else {
     throw new Error('Context or page context is not available.');
   }
-}
+  }
+
+  
 
   public async render(): Promise<void> {
 
@@ -620,7 +582,8 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
           </head>
           
           <header>
-            <h1>Ask Ceo</h1>
+            <h1>Ask CEO</h1>
+            <div id="statusChart" class="${styles.statusChart}"></div>
             <div class="${styles.archiveLink}">
               <i class="fa-solid fa-box-archive"></i>
               <a href="#" id="archiveLink">Archive</a>
@@ -644,10 +607,6 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
             </div>
           </div>
           
-  
-          <div id="archiveContainer" style="display: none;">
-            <button id="backToListButton" class=${styles.backToListButton}>Back to List</button>
-          </div>
 
           <div id="spListContainer"></div>
   
@@ -661,20 +620,8 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
         `;
   
         this.renderList(items);
+
         
-        
-        const backToListButton = this.domElement.querySelector('#backToListButton');
-        if (backToListButton) {
-          backToListButton.addEventListener('click', () => {
-            const archiveContainer = this.domElement.querySelector('#archiveContainer') as HTMLElement;
-            const spListContainer = this.domElement.querySelector('#spListContainer') as HTMLElement;
-            if (archiveContainer && spListContainer) {
-              archiveContainer.style.display = 'none';
-              spListContainer.style.display = 'block';
-              this.renderList(items);
-            }
-          });
-        }
 
         const sortSelect = this.domElement.querySelector('select');
         if (sortSelect) {
@@ -690,27 +637,6 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
           searchInput.addEventListener('input', this.handleSearch.bind(this));
         }
         
-        const archiveLink = this.domElement.querySelector('#archiveLink');
-        if (archiveLink) {
-          archiveLink.addEventListener('click', (event: Event) => {
-            event.preventDefault();
-            const archiveContainer = this.domElement.querySelector('#archiveContainer') as HTMLElement;
-            const spListContainer = this.domElement.querySelector('#spListContainer') as HTMLElement;
-            if (archiveContainer && spListContainer) {
-              if (archiveContainer.style.display === 'none') {
-                archiveContainer.style.display = 'block';
-                spListContainer.style.display = 'none';
-                this.renderArchive(items);
-              } else {
-                archiveContainer.style.display = 'none';
-                spListContainer.style.display = 'block';
-                this.renderList(items);
-              }
-            }
-          });
-        }
-
-  
         const prevButton = this.domElement.querySelector('.prev-button');
         const nextButton = this.domElement.querySelector('.next-button');
   
@@ -785,7 +711,6 @@ export default class AskNelsonWebPart extends BaseClientSideWebPart<{}> {
       }
     });
   }
-
 
   protected get dataVersion(): Version {
     return Version.parse('1.0');

@@ -453,11 +453,6 @@ select {
   border-color: #007bff;
 }
 
-.approvedStatus {
-
-
-}
-
 .underReviewStatus {
   color: #000;
 }
@@ -699,4 +694,29 @@ input:checked + .slider:before {
 
 .backToListButton:hover {
   background-color: #0056b3;
+}
+
+.statusChart {
+  display: flex;
+  align-items: center;
+  margin: 0 20px;
+}
+
+.chartLegend {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+  font-size: 12px;
+}
+
+.underReviewLegend::before {
+  content: '●';
+  color: #ff6700;
+  margin-right: 5px;
+}
+
+.approvedLegend::before {
+  content: '●';
+  color: #4CAF50;
+  margin-right: 5px;
 }

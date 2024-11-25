@@ -9,6 +9,17 @@
     font-family: $ms-font-family-fallbacks;
   }
 }
+hr{
+  margin: 10px 0 0 0;
+}
+
+.spListContainers {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column; /* Ensures items stack vertically */
+  width: 100%; /* Ensures the container takes the full width */
+}
 
 header {
   text-align: left;
@@ -73,6 +84,10 @@ h1 {
   margin-bottom: 10px;
   list-style-type: none;
   border-radius: 10px;
+  width: 80%;
+  max-width: 940px; /* Optional: limits the maximum width of the items */
+  margin: 0 auto 20px; /* Centers the item horizontally */
+
 }
 
 .listpadding{
@@ -99,7 +114,6 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  cursor: pointer;
 }
 
 .replyForm {
@@ -140,6 +154,42 @@ h1 {
   margin-right: 5px;
 }
 
+
+.commentSection {
+  position: relative;
+  cursor: pointer;
+}
+
+.commentIcon {
+  transition: color 0.3s ease;
+}
+
+.commentSection:hover .commentIcon {
+  color: #E52B50; 
+}
+
+.commentTooltip {
+  position: absolute;
+  background-color: #333;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 5px;
+}
+
+.commentSection:hover .commentTooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
 .replyCount {
   font-size: 14px;
   color: #888;
@@ -153,13 +203,27 @@ h1 {
 .replyList {
   list-style-type: none;
   padding-left: 0;
+  min-height: auto;
+  margin-bottom: -10px;
+  padding: 0;
+
 }
 
 .repliesContainer {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease-out;
+  max-height: 1; // Set this to a value larger than your content's height
+  overflow: hidden; // Changed to hidden
+  transition: max-height 0.3s ease-in-out;
+  min-height: auto;
 }
+
+.repliesContainer.hidden {
+  max-height: 0;
+}
+
+.repliesContainerA{
+  margin-top: 5px;
+}
+
 
 .itemReplies.active + .repliesContainer {
   max-height: 1000px; /* Adjust this value based on your content */
@@ -272,7 +336,6 @@ select {
 // }
 
 .pagination{
-  padding: 30px 0;
   display: flex;
   justify-content: center;
   margin-top: 20px;
@@ -429,18 +492,20 @@ select {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .page-number {
-  color: #333;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  padding: 8px 16px;
-  margin: 0 4px;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
   cursor: pointer;
+  padding: 5px 10px;
+  margin: 0 2px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
+
+.page-numbers, .archive-page-numbers {
+  display: flex;
+  align-items: center;
 }
 
 .page-number:hover {
@@ -449,8 +514,7 @@ select {
 
 .page-number.active {
   color: #fff;
-  background-color: #007bff;
-  border-color: #007bff;
+  background-color: #637064;
 }
 
 .underReviewStatus {
@@ -461,9 +525,7 @@ select {
   color: #000;
 }
 
-.replyList {
-  margin-bottom: 10px;
-}
+
 
 .replyList li {
   margin-bottom: 5px;
@@ -719,4 +781,277 @@ input:checked + .slider:before {
   content: '●';
   color: #4CAF50;
   margin-right: 5px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.paginationWrapper {
+  display: flex;
+  align-items: center;
+  list-style-type: none;
+  padding: 0;
+}
+
+.pageNumbers {
+  display: flex;
+  align-items: center;
+}
+
+.prev-button,
+.next-button,
+.archive-prev-button,
+.archive-next-button {
+  cursor: pointer;
+  padding: 5px 10px;
+  margin: 0 5px;
+  border: 1px solid #ddd;
+  background-color: #f8f8f8;
+  color: #333;
+  text-decoration: none;
+  border-radius: 3px;
+
+  &:hover {
+    background-color: #e8e8e8;
+  }
+}
+
+:global(.page-number) {
+  cursor: pointer;
+  padding: 5px 10px;
+  margin: 0 2px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #333;
+  text-decoration: none;
+  border-radius: 3px;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+
+  &.active {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+  }
+}
+
+:global(.page-number) {
+  cursor: pointer;
+  padding: 8px 16px;
+  margin: 0 4px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #333;
+  text-decoration: none;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+
+  &.active {
+    background-color: #14ff27 !important;
+    color: #fff !important;
+    border-color: #637064 !important;
+  }
+}
+
+.ellipsis {
+  padding: 5px 10px;
+  margin: 0 2px;
+}
+
+.starIcon {
+  cursor: pointer;
+  font-size: 18px;
+  margin-right: 0px;
+  margin-left: 6px;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #ffd700; // Gold color on hover
+  }
+
+  &.fa-solid {
+    color: #ffd700; // Gold color when favorited
+  }
+
+  &.fa-regular {
+    color: #808080; // Grey color when not favorited
+  }
+}
+
+.commentSection {
+  display: flex;
+  align-items: center;
+
+  .starIcon,
+  .commentIcon {
+    margin-right: 5px;
+  }
+}
+
+.filterButton {
+  display: inline-block;
+  margin-left: 10px;
+
+  button {
+    background-color: #f0f0f0;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: #e0e0e0;
+    }
+  }
+}
+
+.filterDropdown {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  input[type="checkbox"] {
+    margin-right: 5px;
+  }
+}
+
+
+.listItem {
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.listpadding {
+  padding: 20px;
+}
+
+.itemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.itemTitle {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+
+  .questionText {
+    font-weight: normal;
+    color: #555;
+  }
+}
+
+.itemDate {
+  font-size: 14px;
+  color: #777;
+  display: flex;
+  align-items: center;
+
+  span {
+    margin-right: 5px;
+  }
+
+  .calendarIcon {
+    margin-right: 10px;
+  }
+}
+
+.repliesContainer {
+  margin-top: -15px;
+}
+
+
+
+.replyItem {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.replyContent {
+  flex-grow: 1;
+  font-size: 14px;
+  color: #333;
+}
+
+.replyActions {
+  display: flex;
+  gap: 10px;
+}
+
+.editReplyButton,
+.deleteReplyButton {
+  cursor: pointer;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #333;
+  }
+}
+
+.replyTextarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  font-size: 14px;
+}
+
+.submitReplyButton {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #45a049;
+  }
+}
+
+.preText{
+  font-family: 'Segoe UI Regular WestEuropean', 'Segoe UI', Tahoma, Arial, sans-serif;
+  text-align: left;
+    width: 90%;
+    word-wrap: break-word; /* Ensures long words break to fit within the container */
+    overflow-wrap: break-word; /* Ensures long words break to fit within the container */
+    white-space: pre-wrap; /* Preserves whitespace but wraps text */
+    overflow: hidden; /* Hides any overflow */
 }
